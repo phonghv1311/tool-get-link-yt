@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Channel Link Extractor | Port 3030</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>YouTube Link Extractor</h1>
+            <p>Trích xuất toàn bộ link video / shorts theo ngày đăng để dán vào Excel</p>
+          </div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-port">Port: 3030</span>
+          <span class="badge badge-status" id="systemStatus">Sẵn sàng</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Input Card -->
+      <section class="card input-card">
+        <form id="extractForm" onsubmit="event.preventDefault(); startExtraction();">
+          <div class="form-group">
+            <label for="channelInput" class="form-label">
+              <span>Link kênh YouTube hoặc Handle (@kênh):</span>
+              <span class="label-hint">Hỗ trợ link đầy đủ, @handle, ID kênh UC...</span>
+            </label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+              </span>
+              <input 
+                type="text" 
+                id="channelInput" 
+                class="form-control" 
+                placeholder="VD: https://www.youtube.com/@TED hoặc @TED hoặc UC..." 
+                required 
+                autocomplete="off"
+                spellcheck="false"
+              >
+              <button type="button" class="btn-input-clear" id="btnClearInput" title="Xóa">×</button>
+              <button type="button" class="btn-input-paste" id="btnPasteInput" title="Dán từ Clipboard">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Dán
+              </button>
+            </div>
+          </div>
+
+          <!-- Options Grid -->
+          <div class="options-grid">
+            <!-- Content Type -->
+            <div class="option-card">
+              <span class="option-title">Loại nội dung cần lấy:</span>
+              <div class="radio-group" id="typeGroup">
+                <label class="radio-label active" data-type="videos">
+                  <input type="radio" name="contentType" value="videos" checked>
+                  <span class="radio-custom"></span>
+                  <div class="radio-info">
+                    <strong>🎬 Videos (Video dài)</strong>
+                    <small>Toàn bộ video thông thường</small>
+                  </div>
+                </label>
+                <label class="radio-label" data-type="shorts">
+                  <input type="radio" name="contentType" value="shorts">
+                  <span class="radio-custom"></span>
+                  <div class="radio-info">
+                    <strong>⚡ Shorts (Video ngắn)</strong>
+                    <small>Toàn bộ video Shorts</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Sort Order -->
+            <div class="option-card">
+              <span class="option-title">Thứ tự sắp xếp (Ngày Public):</span>
+              <div class="radio-group" id="sortGroup">
+                <label class="radio-label active" data-sort="newest">
+                  <input type="radio" name="sortOrder" value="newest" checked>
+                  <span class="radio-custom"></span>
+                  <div class="radio-info">
+                    <strong>⏳ Mới nhất trước (Newest)</strong>
+                    <small>Theo thứ tự đăng mới nhất -> cũ nhất</small>
+                  </div>
+                </label>
+                <label class="radio-label" data-sort="oldest">
+                  <input type="radio" name="sortOrder" value="oldest">
+                  <span class="radio-custom"></span>
+                  <div class="radio-info">
+                    <strong>🕰️ Cũ nhất trước (Oldest)</strong>
+                    <small>Theo thứ tự đăng cũ nhất -> mới nhất</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Additional Settings -->
+            <div class="option-card">
+              <span class="option-title">Tùy chọn nâng cao:</span>
+              <div class="advanced-controls">
+                <div class="sub-control">
+                  <label for="limitSelect">Giới hạn số lượng:</label>
+                  <select id="limitSelect" class="form-select">
+                    <option value="0" selected>Toàn bộ kênh (Không giới hạn)</option>
+                    <option value="50">50 video gần nhất</option>
+                    <option value="100">100 video gần nhất</option>
+                    <option value="200">200 video gần nhất</option>
+                    <option value="500">500 video gần nhất</option>
+                    <option value="1000">1,000 video gần nhất</option>
+                  </select>
+                </div>
+                <div class="sub-control" id="shortsFormatWrap" style="display: none;">
+                  <label for="shortsFormatSelect">Định dạng link Shorts:</label>
+                  <select id="shortsFormatSelect" class="form-select">
+                    <option value="shorts" selected>youtube.com/shorts/{id}</option>
+                    <option value="watch">youtube.com/watch?v={id}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-large" id="btnSubmit">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2.5">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Bắt Đầu Lấy Link</span>
+            </button>
+            <button type="button" class="btn btn-danger btn-large" id="btnStop" style="display: none;">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2.5">
+                <rect x="6" y="6" width="12" height="12"></rect>
+              </svg>
+              <span>Dừng Lại</span>
+            </button>
+            <div class="speed-indicator">
+              <span class="pulse-dot"></span>
+              <span>Thuật toán cào siêu tốc (Fast InnerTube Engine)</span>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Results Section -->
+      <section class="card results-card" id="resultsSection" style="display: none;">
+        <!-- Header Info Bar -->
+        <div class="results-header-bar">
+          <div class="channel-summary">
+            <div class="channel-avatar" id="channelAvatar">YT</div>
+            <div class="channel-details">
+              <h2 id="channelTitle">Đang kết nối...</h2>
+              <div class="meta-tags">
+                <span class="meta-tag" id="channelTypeTag">Videos</span>
+                <span class="meta-tag" id="elapsedTag">0.0s</span>
+                <a id="channelUrlLink" href="#" target="_blank" rel="noopener" class="channel-link">Mở kênh trên YouTube ↗</a>
+              </div>
+            </div>
+          </div>
+          <!-- TOTAL LINKS BADGE -->
+          <div class="total-links-badge-container">
+            <span class="total-label">TỔNG SỐ LINKS</span>
+            <div class="total-number-wrap">
+              <span class="total-number" id="totalCount">0</span>
+              <span class="total-unit">links</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-animated" id="progressBar"></div>
+        </div>
+
+        <!-- Action & Format Bar -->
+        <div class="excel-actions-bar">
+          <div class="format-selector">
+            <span class="format-label">Định dạng khối Excel:</span>
+            <div class="format-buttons" id="formatButtons">
+              <button type="button" class="btn-format active" data-format="link-only" title="Mỗi dòng 1 link (phù hợp dán 1 cột)">
+                🔗 Chỉ Link
+              </button>
+              <button type="button" class="btn-format" data-format="title-link" title="Cột 1: Tiêu đề, Cột 2: Link (Tab-separated)">
+                📑 Tiêu đề + Link
+              </button>
+              <button type="button" class="btn-format" data-format="link-title" title="Cột 1: Link, Cột 2: Tiêu đề (Tab-separated)">
+                📑 Link + Tiêu đề
+              </button>
+              <button type="button" class="btn-format" data-format="full-tsv" title="5 cột: STT, Tiêu đề, Link, Thời lượng, View">
+                📊 Đầy đủ 5 cột
+              </button>
+            </div>
+          </div>
+
+          <div class="export-buttons">
+            <!-- COPY FOR EXCEL BUTTON -->
+            <button type="button" class="btn btn-copy-excel" id="btnCopyExcel" title="Sao chép toàn bộ để dán vào Excel">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Sao Chép Cho Excel</span>
+            </button>
+            <!-- DOWNLOAD TXT BUTTON -->
+            <button type="button" class="btn btn-download-txt" id="btnDownloadTxt" title="Tải về file danh sách .txt">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Tải File .TXT</span>
+            </button>
+            <!-- DOWNLOAD CSV BUTTON -->
+            <button type="button" class="btn btn-download-csv" id="btnDownloadCsv" title="Tải về file Excel .CSV">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Tải .CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- View Tabs: Text Block vs Table -->
+        <div class="view-tabs">
+          <div class="tab-triggers">
+            <button type="button" class="tab-btn active" data-tab="tabBlock">
+              📋 Khối Dữ Liệu Copy Dán Excel
+            </button>
+            <button type="button" class="tab-btn" data-tab="tabTable">
+              📑 Bảng Chi Tiết & Xem Trước (<span id="tableTabCount">0</span>)
+            </button>
+          </div>
+          <div class="tab-extra">
+            <button type="button" class="btn-inline" id="btnToggleSort" title="Đảo ngược thứ tự danh sách">
+              🔄 Đảo thứ tự (Mới/Cũ)
+            </button>
+            <button type="button" class="btn-inline" id="btnSelectAll" title="Chọn bôi đen toàn bộ">
+              Select All
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 1: Text Block for Excel -->
+        <div class="tab-pane active" id="tabBlock">
+          <div class="block-wrapper">
+            <div class="block-toolbar">
+              <span class="block-info" id="blockInfo">Đang chuẩn bị dữ liệu...</span>
+              <button type="button" class="btn-copy-mini" id="btnCopyMini">Copy nhanh</button>
+            </div>
+            <textarea 
+              id="excelBlock" 
+              class="excel-textarea" 
+              readonly 
+              spellcheck="false" 
+              placeholder="Danh sách link sẽ xuất hiện tại đây..."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Tab 2: Detailed Table -->
+        <div class="tab-pane" id="tabTable">
+          <div class="table-search-bar">
+            <input type="text" id="tableFilterInput" class="form-control" placeholder="Tìm kiếm theo tiêu đề video...">
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th style="width: 80px;">Ảnh</th>
+                  <th>Tiêu đề video</th>
+                  <th style="width: 100px;">Thời lượng</th>
+                  <th style="width: 100px;">Lượt xem</th>
+                  <th style="width: 110px;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="videoTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>YouTube Link Extractor Tool &bull; Host: <code>http://localhost:3030</code> &bull; Tốc độ cao &bull; Sẵn sàng cho Excel</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
